@@ -87,19 +87,6 @@
         app:layout_constraintStart_toStartOf="@+id/viewFinder"
         app:layout_constraintTop_toTopOf="@+id/viewFinder" />
 
-    <org.lineageos.aperture.ui.views.HorizontalSlider
-        android:id="@+id/zoomLevel"
-        android:layout_width="250dp"
-        android:layout_height="32dp"
-        android:layout_marginBottom="16dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/secondaryBottomBarLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:thumbColor="@android:color/white"
-        app:thumbTextColor="@android:color/black"
-        app:thumbTextSize="10dp"
-        app:trackColor="#7FCCCCCC" />
 
     <org.lineageos.aperture.ui.views.VerticalSlider
         android:id="@+id/exposureLevel"
@@ -240,6 +227,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <org.lineageos.aperture.ui.views.HorizontalSlider
+            android:id="@+id/zoomSlider"
+            android:layout_width="250dp"
+            android:layout_height="36dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:thumbColor="@android:color/white"
+            app:thumbTextColor="@android:color/black"
+            app:thumbTextSize="10dp"
+            app:trackColor="#7FCCCCCC" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -272,10 +273,10 @@
             android:layout_marginStart="32dp"
             android:backgroundTint="?colorSecondaryContainer"
             android:scaleType="fitXY"
-            app:cardCornerRadius="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:cardCornerRadius="30dp"
+            app:layout_constraintBottom_toBottomOf="@id/shutterButton"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="@id/shutterButton">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -311,9 +312,9 @@
             android:contentDescription="@string/flip_camera_button_description"
             android:scaleType="center"
             android:src="@drawable/ic_flip_camera"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/shutterButton"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@id/shutterButton" />
 
         <ImageButton
             android:id="@+id/videoRecordingStateButton"
@@ -323,10 +324,10 @@
             android:contentDescription="@string/video_recording_state_button_description"
             android:src="@drawable/avd_video_recording_pause"
             android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/shutterButton"
             app:layout_constraintEnd_toEndOf="@+id/flipCameraButton"
             app:layout_constraintStart_toStartOf="@+id/flipCameraButton"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@id/shutterButton" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -376,5 +377,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_flash_off" />
+
+    <androidx.constraintlayout.widget.Guideline android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

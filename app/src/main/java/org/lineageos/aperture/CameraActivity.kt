@@ -26,6 +26,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.GestureDetector
 import android.view.KeyEvent
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -126,11 +127,11 @@ import org.lineageos.aperture.ui.views.CameraModeSelectorLayout
 import org.lineageos.aperture.ui.views.CapturePreviewLayout
 import org.lineageos.aperture.ui.views.CountDownView
 import org.lineageos.aperture.ui.views.GridView
-import org.lineageos.aperture.ui.views.HorizontalSlider
 import org.lineageos.aperture.ui.views.IslandView
 import org.lineageos.aperture.ui.views.LensSelectorLayout
 import org.lineageos.aperture.ui.views.LevelerView
 import org.lineageos.aperture.ui.views.PreviewBlurView
+import org.lineageos.aperture.ui.views.HorizontalSlider
 import org.lineageos.aperture.ui.views.VerticalSlider
 import org.lineageos.aperture.utils.ExifUtils
 import org.lineageos.aperture.utils.GoogleLensUtils
@@ -169,6 +170,8 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
     private val levelerView by lazy { findViewById<LevelerView>(R.id.levelerView) }
     private val mainLayout by lazy { findViewById<ConstraintLayout>(R.id.mainLayout) }
     private val micButton by lazy { findViewById<Button>(R.id.micButton) }
+
+    private val zoomSlider by lazy { findViewById<HorizontalSlider>(R.id.zoomSlider) }
     private val previewBlurView by lazy { findViewById<PreviewBlurView>(R.id.previewBlurView) }
     private val proButton by lazy { findViewById<ImageButton>(R.id.proButton) }
     private val screenFlashView by lazy { findViewById<ScreenFlashView>(R.id.screenFlashView) }
@@ -183,7 +186,6 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
     private val videoDynamicRangeButton by lazy { findViewById<Button>(R.id.videoDynamicRangeButton) }
     private val viewFinder by lazy { findViewById<PreviewView>(R.id.viewFinder) }
     private val viewFinderFocus by lazy { findViewById<ImageView>(R.id.viewFinderFocus) }
-    private val zoomLevel by lazy { findViewById<HorizontalSlider>(R.id.zoomLevel) }
 
     // System services
     private val keyguardManager by lazy { getSystemService(KeyguardManager::class.java) }
@@ -236,6 +238,7 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
             when (it) {
                 is ZoomGestureDetector.ZoomEvent.Begin -> {
                     zoomGestureDetectorIsInProgress = true
+                    showZoomSlider()
                 }
 
                 is ZoomGestureDetector.ZoomEvent.Move -> {
@@ -246,6 +249,7 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
 
                 is ZoomGestureDetector.ZoomEvent.End -> {
                     zoomGestureDetectorIsInProgress = false
+                    scheduleHideZoomSlider(1000)
                 }
             }
             true
@@ -257,10 +261,6 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
         override fun handleMessage(msg: Message) {
             super.handleMessage(msg)
             when (msg.what) {
-                MSG_HIDE_ZOOM_SLIDER -> {
-                    zoomLevel.isVisible = false
-                }
-
                 MSG_HIDE_FOCUS_RING -> {
                     viewFinderFocus.isVisible = false
                 }
@@ -270,6 +270,28 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
                 }
             }
         }
+    }
+
+    private val hideZoomSliderRunnable = Runnable {
+        zoomSlider.animate().alpha(0f).setDuration(200).withEndAction {
+            zoomSlider.visibility = android.view.View.GONE
+        }.start()
+        lensSelectorLayout.animate().alpha(1f).setDuration(200).start()
+    }
+
+    private fun showZoomSlider() {
+        handler.removeCallbacks(hideZoomSliderRunnable)
+        if (zoomSlider.visibility != android.view.View.VISIBLE) {
+            zoomSlider.alpha = 0f
+            zoomSlider.visibility = android.view.View.VISIBLE
+            zoomSlider.animate().alpha(1f).setDuration(150).start()
+            lensSelectorLayout.animate().alpha(0f).setDuration(150).start()
+        }
+    }
+
+    private fun scheduleHideZoomSlider(delayMs: Long) {
+        handler.removeCallbacks(hideZoomSliderRunnable)
+        handler.postDelayed(hideZoomSliderRunnable, delayMs)
     }
 
     // Permissions
@@ -492,14 +514,6 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
                 else -> {}
             }
         }
-
-        zoomLevel.onProgressChangedByUser = {
-            viewModel.cameraController.setLinearZoom(it)
-        }
-        zoomLevel.textFormatter = {
-            "%.1fx".format(viewModel.zoomState.value?.zoomRatio)
-        }
-
         // Set expose level callback & text formatter
         exposureLevel.onProgressChangedByUser = {
             viewModel.setExposureCompensationLevel(it)
@@ -553,6 +567,41 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
         }
         lensSelectorLayout.onResetZoomRatioCallback = {
             viewModel.resetZoom()
+        }
+        lensSelectorLayout.onZoomDragCallback = { dx ->
+            val zoomState = viewModel.zoomState.value
+            if (zoomState != null) {
+                val currentLinear = zoomState.linearZoom
+                val targetLinear = (currentLinear + dx / 600f).coerceIn(0f, 1f)
+                viewModel.cameraController.setLinearZoom(targetLinear)
+            }
+        }
+        lensSelectorLayout.onZoomDragStartCallback = {
+            showZoomSlider()
+        }
+        lensSelectorLayout.onZoomDragEndCallback = {
+            scheduleHideZoomSlider(1000)
+        }
+
+        // Set zoom slider callbacks
+        zoomSlider.onProgressChangedByUser = {
+            viewModel.cameraController.setLinearZoom(it)
+        }
+        zoomSlider.textFormatter = {
+            val ratio = viewModel.zoomState.value?.zoomRatio ?: 1f
+            String.format(java.util.Locale.US, "%.1f×", ratio)
+        }
+        @Suppress("ClickableViewAccessibility")
+        zoomSlider.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                    handler.removeCallbacks(hideZoomSliderRunnable)
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    scheduleHideZoomSlider(2000)
+                }
+            }
+            false
         }
 
         // Set capture preview callback
@@ -892,7 +941,6 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
 
                 // Rotate sliders
                 exposureLevel.screenRotation = screenRotation
-                zoomLevel.screenRotation = screenRotation
 
                 // Rotate info chip
                 islandView.setScreenRotation(screenRotation)
@@ -1091,12 +1139,7 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
         launch {
             viewModel.zoomState.collectLatest { zoomState ->
                 zoomState?.takeIf { it.minZoomRatio != it.maxZoomRatio }?.let {
-                    zoomLevel.progress = it.linearZoom
-                    zoomLevel.isVisible = true
-
-                    handler.removeMessages(MSG_HIDE_ZOOM_SLIDER)
-                    handler.sendMessageDelayed(handler.obtainMessage(MSG_HIDE_ZOOM_SLIDER), 2000)
-
+                    zoomSlider.progress = it.linearZoom
                     lensSelectorLayout.onZoomRatioChanged(it.zoomRatio)
                 }
             }
@@ -2069,7 +2112,6 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
     companion object {
         private val LOG_TAG = CameraActivity::class.simpleName!!
 
-        private const val MSG_HIDE_ZOOM_SLIDER = 0
         private const val MSG_HIDE_FOCUS_RING = 1
         private const val MSG_HIDE_EXPOSURE_SLIDER = 2
         private const val MSG_ON_PINCH_TO_ZOOM = 3

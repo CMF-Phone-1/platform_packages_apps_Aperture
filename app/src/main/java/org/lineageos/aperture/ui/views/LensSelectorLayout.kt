@@ -42,6 +42,15 @@ class LensSelectorLayout @JvmOverloads constructor(
     var onCameraChangeCallback: (camera: Camera) -> Unit = {}
     var onZoomRatioChangeCallback: (zoomRatio: Float) -> Unit = {}
     var onResetZoomRatioCallback: () -> Unit = {}
+    var onZoomDragCallback: (dx: Float) -> Unit = {}
+    var onZoomDragStartCallback: () -> Unit = {}
+    var onZoomDragEndCallback: () -> Unit = {}
+
+    private var startX = 0f
+    private var startY = 0f
+    private var lastX = 0f
+    private var isDragging = false
+    private val touchSlop by lazy { android.view.ViewConfiguration.get(context).scaledTouchSlop }
 
     fun setCamera(activeCamera: Camera, availableCameras: Collection<Camera>) {
         this.activeCamera = activeCamera
@@ -112,6 +121,66 @@ class LensSelectorLayout @JvmOverloads constructor(
         for (button in buttonToApproximateZoomRatio.keys) {
             button.smoothRotate(rotation)
         }
+    }
+
+    override fun onInterceptTouchEvent(ev: android.view.MotionEvent): Boolean {
+        when (ev.action) {
+            android.view.MotionEvent.ACTION_DOWN -> {
+                startX = ev.x
+                startY = ev.y
+                lastX = ev.x
+                isDragging = false
+            }
+            android.view.MotionEvent.ACTION_MOVE -> {
+                if (!isDragging) {
+                    val dx = ev.x - startX
+                    val dy = ev.y - startY
+                    if (kotlin.math.abs(dx) > touchSlop && kotlin.math.abs(dx) > kotlin.math.abs(dy)) {
+                        isDragging = true
+                        lastX = ev.x
+                        parent?.requestDisallowInterceptTouchEvent(true)
+                        onZoomDragStartCallback()
+                    }
+                }
+            }
+        }
+        return isDragging
+    }
+
+    @Suppress("ClickableViewAccessibility")
+    override fun onTouchEvent(ev: android.view.MotionEvent): Boolean {
+        when (ev.action) {
+            android.view.MotionEvent.ACTION_DOWN -> {
+                startX = ev.x
+                startY = ev.y
+                lastX = ev.x
+                isDragging = false
+            }
+            android.view.MotionEvent.ACTION_MOVE -> {
+                if (!isDragging) {
+                    val dx = ev.x - startX
+                    val dy = ev.y - startY
+                    if (kotlin.math.abs(dx) > touchSlop && kotlin.math.abs(dx) > kotlin.math.abs(dy)) {
+                        isDragging = true
+                        parent?.requestDisallowInterceptTouchEvent(true)
+                        onZoomDragStartCallback()
+                    }
+                }
+                if (isDragging) {
+                    val dx = ev.x - lastX
+                    lastX = ev.x
+                    onZoomDragCallback(dx)
+                }
+            }
+            android.view.MotionEvent.ACTION_UP,
+            android.view.MotionEvent.ACTION_CANCEL -> {
+                if (isDragging) {
+                    onZoomDragEndCallback()
+                }
+                isDragging = false
+            }
+        }
+        return true
     }
 
     private fun inflateButton(): Button {

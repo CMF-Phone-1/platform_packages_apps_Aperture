@@ -1089,8 +1089,9 @@ class CameraViewModel(application: Application) : ApertureViewModel(application)
                     "Photo capture succeeded: ${output.savedUri} format = ${output.imageFormat}"
                 )
 
-                if (!inSingleCaptureMode.value) {
-                    output.savedUri?.let {
+                output.savedUri?.let {
+
+                    if (!inSingleCaptureMode.value) {
                         mediaRepository.broadcastNewPicture(it)
                     }
                 }
@@ -1537,6 +1538,10 @@ class CameraViewModel(application: Application) : ApertureViewModel(application)
         this.exposureCompensationLevel.value = exposureCompensationLevel
     }
 
+    fun setAbsoluteZoom(absoluteRatio: Float) {
+        cameraController.setZoomRatio(absoluteRatio)
+    }
+
     /**
      * Apply the specified zoom smoothly. The value will be automatically clamped
      * between min and max.
@@ -1554,6 +1559,8 @@ class CameraViewModel(application: Application) : ApertureViewModel(application)
             zoomState.zoomRatio,
             zoomRatio.coerceIn(zoomState.minZoomRatio, zoomState.maxZoomRatio)
         ).apply {
+            duration = 150
+            interpolator = android.view.animation.DecelerateInterpolator()
             addUpdateListener {
                 cameraController.setZoomRatio(it.animatedValue as Float)
             }

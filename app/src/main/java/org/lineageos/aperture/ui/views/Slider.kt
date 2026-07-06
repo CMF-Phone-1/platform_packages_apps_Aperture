@@ -15,7 +15,9 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Shader
+import android.os.Build
 import android.util.AttributeSet
+import android.view.HapticFeedbackConstants
 import android.view.View
 import org.lineageos.aperture.R
 import org.lineageos.aperture.ext.px
@@ -37,6 +39,11 @@ abstract class Slider @JvmOverloads constructor(
         strokeWidth = 2F
     }
 
+    private val tickPaint = Paint().apply {
+        style = Paint.Style.FILL
+        color = Color.parseColor("#4DFFFFFF") // 30% transparent white
+    }
+
     private val thumbPaint = Paint().apply {
         style = Paint.Style.FILL
         xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
@@ -47,9 +54,12 @@ abstract class Slider @JvmOverloads constructor(
 
     private var gradientColors: IntArray
 
+    private var lastHapticProgress = 0f
+
     var progress = 0.5f
         set(value) {
-            field = value.coerceIn(0f, 1f)
+            val clamped = value.coerceIn(0f, 1f)
+            field = clamped
             invalidate()
         }
     var onProgressChangedByUser: ((value: Float) -> Unit)? = null
@@ -102,14 +112,55 @@ abstract class Slider @JvmOverloads constructor(
         super.onDraw(canvas)
 
         drawTrack(canvas)
+        drawTicks(canvas)
         drawThumb(canvas)
+    }
+
+    private fun drawTicks(canvas: Canvas) {
+        val track = track()
+        val isHorizontal = track.width() > track.height()
+        val tickCount = 9 // 9 ticks (0%, 12.5%, 25%, ..., 100%)
+
+        if (isHorizontal) {
+            val thumbRadius = (track.height() / 2f) - 2.px.toFloat()
+            val minX = track.left + thumbRadius + 2.px.toFloat()
+            val maxX = track.right - thumbRadius - 2.px.toFloat()
+            val rangeX = maxX - minX
+
+            val tickWidth = 1.px.toFloat()
+            val tickHeight = track.height() * 0.4f
+            val startY = track.centerY() - tickHeight / 2f
+            val endY = startY + tickHeight
+
+            for (i in 0 until tickCount) {
+                val fraction = i.toFloat() / (tickCount - 1)
+                val x = minX + fraction * rangeX
+                canvas.drawRect(x - tickWidth / 2f, startY, x + tickWidth / 2f, endY, tickPaint)
+            }
+        } else {
+            val thumbRadius = (track.width() / 2f) - 2.px.toFloat()
+            val minY = track.top + thumbRadius + 2.px.toFloat()
+            val maxY = track.bottom - thumbRadius - 2.px.toFloat()
+            val rangeY = maxY - minY
+
+            val tickHeight = 1.px.toFloat()
+            val tickWidth = track.width() * 0.4f
+            val startX = track.centerX() - tickWidth / 2f
+            val endX = track.centerX() + tickWidth / 2f
+
+            for (i in 0 until tickCount) {
+                val fraction = i.toFloat() / (tickCount - 1)
+                val y = minY + fraction * rangeY
+                canvas.drawRect(startX, y - tickHeight / 2f, endX, y + tickHeight / 2f, tickPaint)
+            }
+        }
     }
 
     abstract fun track(): RectF
 
     private fun drawTrack(canvas: Canvas) {
         val track = track()
-        val trackRadius = track.width() * 0.75f
+        val trackRadius = if (track.width() > track.height()) track.height() / 2f else track.width() / 2f
 
         if (gradientColors.isNotEmpty()) {
             trackPaint.shader = LinearGradient(

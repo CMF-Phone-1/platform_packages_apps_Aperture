@@ -11,6 +11,4 @@
     android:padding="0dp"
     android:textAllCaps="true"
     android:textColor="@color/camera_mode_selector_text"
-    android:textStyle="bold"
-    android:typeface="monospace"
     app:iconPadding="0dp" />
