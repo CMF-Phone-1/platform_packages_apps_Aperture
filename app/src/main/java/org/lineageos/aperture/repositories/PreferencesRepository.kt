@@ -298,6 +298,16 @@ class PreferencesRepository(
     ).asPreferenceHolder()
 
     /**
+     * Whether haptic feedback should be enabled.
+     */
+    val hapticFeedback = primitivePreference(
+        key = "haptic_feedback",
+        defaultValue = true,
+    ).asPreferenceHolder()
+
+
+
+    /**
      * Whether video stabilization should be enabled.
      */
     val videoStabilization = primitivePreference(

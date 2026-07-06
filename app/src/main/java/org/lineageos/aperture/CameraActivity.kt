@@ -530,6 +530,13 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
         }
 
         shutterButton.setOnClickListener {
+            if (viewModel.hapticFeedbackEnabled) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    shutterButton.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                } else {
+                    shutterButton.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                }
+            }
             // Shutter animation
             when (viewModel.cameraMode.value) {
                 CameraMode.PHOTO -> startShutterAnimation(ShutterAnimation.PhotoCapture)
@@ -620,6 +627,13 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
 
         // Set mode selector callback
         cameraModeSelectorLayout.onModeSelectedCallback = {
+            if (viewModel.hapticFeedbackEnabled) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    cameraModeSelectorLayout.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                } else {
+                    cameraModeSelectorLayout.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                }
+            }
             viewModel.setCameraMode(it)
         }
 

@@ -61,6 +61,24 @@ abstract class Slider @JvmOverloads constructor(
             val clamped = value.coerceIn(0f, 1f)
             field = clamped
             invalidate()
+
+            if (visibility == View.VISIBLE) {
+                val app = context.applicationContext as? org.lineageos.aperture.ApertureApplication
+                val hapticEnabled = app?.preferencesRepository?.hapticFeedback?.value ?: true
+                val tickStep = 0.02f
+                val currentTick = (clamped / tickStep).toInt()
+                val lastTick = (lastHapticProgress / tickStep).toInt()
+                if (currentTick != lastTick) {
+                    if (hapticEnabled) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                        } else {
+                            performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                        }
+                    }
+                    lastHapticProgress = clamped
+                }
+            }
         }
     var onProgressChangedByUser: ((value: Float) -> Unit)? = null
 

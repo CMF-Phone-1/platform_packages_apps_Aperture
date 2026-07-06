@@ -27,8 +27,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
+import android.os.Build
+import android.view.HapticFeedbackConstants
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
+import androidx.preference.TwoStatePreference
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.launch
@@ -122,6 +125,21 @@ class SettingsActivity : AppCompatActivity(R.layout.activity_settings) {
             }
 
             super.onDestroyView()
+        }
+
+        override fun onPreferenceTreeClick(preference: Preference): Boolean {
+            val app = requireContext().applicationContext as? ApertureApplication
+            val hapticEnabled = app?.preferencesRepository?.hapticFeedback?.value ?: true
+            if (hapticEnabled && preference is TwoStatePreference) {
+                view?.performHapticFeedback(
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        HapticFeedbackConstants.CONFIRM
+                    } else {
+                        HapticFeedbackConstants.KEYBOARD_TAP
+                    }
+                )
+            }
+            return super.onPreferenceTreeClick(preference)
         }
 
         @CallSuper

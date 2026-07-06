@@ -37,6 +37,13 @@
             app:summary="@string/leveler_summary"
             app:title="@string/leveler_title" />
 
+        <SwitchPreference
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:key="haptic_feedback"
+            app:summary="@string/haptic_feedback_summary"
+            app:title="@string/haptic_feedback_title" />
+
         <Preference
             app:fragment="org.lineageos.aperture.SettingsActivity$GesturesSettingsFragment"
             app:iconSpaceReserved="false"
