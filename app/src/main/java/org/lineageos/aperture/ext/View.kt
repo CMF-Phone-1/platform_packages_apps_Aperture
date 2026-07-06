@@ -34,7 +34,7 @@ internal fun View.slideUp() {
 
     measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
     startAnimation(AnimationSet(true).apply {
-        addAnimation(TranslateAnimation(0f, 0f, measuredHeight.toFloat(), 0f).apply {
+        addAnimation(TranslateAnimation(0f, 0f, -measuredHeight.toFloat(), 0f).apply {
             duration = 250
         })
         addAnimation(AlphaAnimation(0.0f, 1.0f).apply {
@@ -51,7 +51,7 @@ internal fun View.slideDown() {
     isVisible = false
 
     startAnimation(AnimationSet(true).apply {
-        addAnimation(TranslateAnimation(0f, 0f, 0f, height.toFloat()).apply {
+        addAnimation(TranslateAnimation(0f, 0f, 0f, -height.toFloat()).apply {
             duration = 200
         })
         addAnimation(AlphaAnimation(1.0f, 0.0f).apply {

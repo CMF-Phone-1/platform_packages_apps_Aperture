@@ -21,9 +21,9 @@
     <string name="video_recording_state_button_description">Pause/resume video recording</string>
 
     <!-- Secondary button text -->
-    <string name="timer_off">TIMER OFF</string>
-    <string name="timer_3">TIMER 3s</string>
-    <string name="timer_10">TIMER 10s</string>
+    <string name="timer_off">TIMER</string>
+    <string name="timer_3">TIMER</string>
+    <string name="timer_10">TIMER</string>
 
     <string name="aspect_ratio_4_3" translatable="false">4:3</string>
     <string name="aspect_ratio_16_9" translatable="false">16:9</string>
@@ -43,10 +43,10 @@
     <string name="effect_face_retouch">FACE RETOUCH</string>
     <string name="effect_auto">AUTO</string>
 
-    <string name="grid_off">GRID OFF</string>
-    <string name="grid_on_3">GRID 3x3</string>
-    <string name="grid_on_4">GRID 4x4</string>
-    <string name="grid_on_goldenratio">GRID φ</string>
+    <string name="grid_off">GRID</string>
+    <string name="grid_on_3">GRID</string>
+    <string name="grid_on_4">GRID</string>
+    <string name="grid_on_goldenratio">GRID</string>
 
     <string name="mic_off">MIC OFF</string>
     <string name="mic_on">MIC ON</string>
