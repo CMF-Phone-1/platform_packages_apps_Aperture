@@ -33,6 +33,7 @@ import androidx.core.location.LocationRequestCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import org.lineageos.aperture.utils.ExifUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -459,6 +460,18 @@ class CameraViewModel(application: Application) : ApertureViewModel(application)
             started = SharingStarted.WhileSubscribed(),
             initialValue = false
         )
+
+    /**
+     * Whether haptic feedback is enabled.
+     */
+    val hapticFeedbackEnabled: Boolean
+        get() = preferencesRepository.hapticFeedback.value
+
+    /**
+     * Whether metadata should be saved.
+     */
+    val saveMetadataEnabled: Boolean
+        get() = preferencesRepository.saveMetadata.value
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val thermalStatus = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -1090,7 +1103,9 @@ class CameraViewModel(application: Application) : ApertureViewModel(application)
                 )
 
                 output.savedUri?.let {
-
+                    if (!saveMetadataEnabled) {
+                        ExifUtils.stripMetadata(applicationContext, it)
+                    }
                     if (!inSingleCaptureMode.value) {
                         mediaRepository.broadcastNewPicture(it)
                     }

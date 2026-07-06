@@ -305,7 +305,13 @@ class PreferencesRepository(
         defaultValue = true,
     ).asPreferenceHolder()
 
-
+    /**
+     * Whether metadata should be saved.
+     */
+    val saveMetadata = primitivePreference(
+        key = "save_metadata",
+        defaultValue = true,
+    ).asPreferenceHolder()
 
     /**
      * Whether video stabilization should be enabled.

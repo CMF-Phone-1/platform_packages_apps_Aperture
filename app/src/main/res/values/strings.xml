@@ -100,6 +100,7 @@
 
     <!-- Preference Titles -->
     <string name="general_header">General</string>
+    <string name="privacy_header">Privacy</string>
     <string name="photos_header">Photos</string>
     <string name="video_header">Video</string>
     <string name="advanced_header">Advanced</string>
@@ -116,6 +117,9 @@
     <string name="leveler_summary">Indicator that shows device orientation</string>
     <string name="haptic_feedback_title">Haptic feedback</string>
     <string name="haptic_feedback_summary">Vibrate on UI interactions</string>
+    <!-- Privacy preferences -->
+    <string name="save_metadata_title">Save EXIF metadata</string>
+    <string name="save_metadata_summary">Save camera settings and device information in captured photos</string>
     <string name="gestures_title">Gestures</string>
 
     <!-- Gestures preferences -->

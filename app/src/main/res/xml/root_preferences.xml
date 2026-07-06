@@ -17,13 +17,6 @@
             app:title="@string/bright_screen_title" />
 
         <SwitchPreference
-            app:defaultValue="false"
-            app:iconSpaceReserved="false"
-            app:key="save_location"
-            app:summary="@string/save_location_summary"
-            app:title="@string/save_location_title" />
-
-        <SwitchPreference
             app:defaultValue="true"
             app:iconSpaceReserved="false"
             app:key="shutter_sound"
@@ -48,6 +41,26 @@
             app:fragment="org.lineageos.aperture.SettingsActivity$GesturesSettingsFragment"
             app:iconSpaceReserved="false"
             app:title="@string/gestures_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="@string/privacy_header">
+
+        <SwitchPreference
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:key="save_metadata"
+            app:summary="@string/save_metadata_summary"
+            app:title="@string/save_metadata_title" />
+
+        <SwitchPreference
+            app:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:key="save_location"
+            app:summary="@string/save_location_summary"
+            app:title="@string/save_location_title" />
 
     </PreferenceCategory>
 
