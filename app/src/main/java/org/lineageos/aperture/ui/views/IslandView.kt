@@ -132,7 +132,8 @@ class IslandView @JvmOverloads constructor(
                         false -> 0f
                     }
                 )
-                setDuration(shortAnimationDuration)
+                setDuration(120)
+                setInterpolator(android.view.animation.DecelerateInterpolator())
                 setListener(
                     object : AnimatorListenerAdapter() {
                         var animationCanceled = false

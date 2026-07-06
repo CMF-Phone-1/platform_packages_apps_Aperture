@@ -77,6 +77,8 @@ class CameraModeSelectorLayout @JvmOverloads constructor(
             ValueAnimator.ofFloat(
                 cameraModeHighlightButton.x, currentCameraModeButton.x + 16.px
             ).apply {
+                duration = 150
+                interpolator = android.view.animation.DecelerateInterpolator()
                 addUpdateListener { valueAnimator ->
                     cameraModeHighlightButton.x = valueAnimator.animatedValue as Float
                 }
@@ -86,6 +88,8 @@ class CameraModeSelectorLayout @JvmOverloads constructor(
             ValueAnimator.ofInt(
                 cameraModeHighlightButton.width, currentCameraModeButton.width
             ).apply {
+                duration = 150
+                interpolator = android.view.animation.DecelerateInterpolator()
                 addUpdateListener { valueAnimator ->
                     cameraModeHighlightButton.width = valueAnimator.animatedValue as Int
                 }

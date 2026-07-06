@@ -64,6 +64,7 @@ internal fun View.smoothRotate(rotation: Float) {
     with(animate()) {
         cancel()
         rotationBy(Rotation.getDifference(this@smoothRotate.rotation, rotation))
-            .interpolator = AccelerateDecelerateInterpolator()
+            .setDuration(150)
+            .setInterpolator(android.view.animation.DecelerateInterpolator())
     }
 }
