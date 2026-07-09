@@ -108,6 +108,7 @@ import org.lineageos.aperture.models.CameraMode
 import org.lineageos.aperture.models.CameraState
 import org.lineageos.aperture.models.Event
 import org.lineageos.aperture.models.FlashMode
+import org.lineageos.aperture.models.FrameRate
 import org.lineageos.aperture.models.GestureAction
 import org.lineageos.aperture.models.GridMode
 import org.lineageos.aperture.models.HardwareKey
@@ -1593,6 +1594,16 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
                         )
                         .build()
 
+                viewModel.cameraController.previewResolutionSelector =
+                    ResolutionSelector.Builder()
+                        .setAspectRatioStrategy(
+                            AspectRatioStrategy(
+                                cameraConfiguration.photoAspectRatio,
+                                AspectRatioStrategy.FALLBACK_RULE_AUTO,
+                            )
+                        )
+                        .build()
+
                 CameraController.IMAGE_CAPTURE
             }
 
@@ -1617,6 +1628,15 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
                 ) {
                     "Video dynamic range not supported with the requested video quality"
                 }
+
+                viewModel.cameraController.previewResolutionSelector =
+                    if (cameraConfiguration.videoFrameRate == FrameRate.FPS_60) {
+                        ResolutionSelector.Builder()
+                            .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
+                            .build()
+                    } else {
+                        null
+                    }
 
                 // Set the quality
                 viewModel.cameraController.videoCaptureQualitySelector =
@@ -1646,6 +1666,8 @@ open class CameraActivity : AppCompatActivity(R.layout.activity_camera) {
                 viewModel.cameraController.setImageAnalysisAnalyzer(
                     viewModel.cameraExecutor, viewModel.qrImageAnalyzer
                 )
+
+                viewModel.cameraController.previewResolutionSelector = null
 
                 CameraController.IMAGE_ANALYSIS
             }
