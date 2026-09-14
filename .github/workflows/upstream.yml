@@ -1,0 +1,23 @@
+name: Sync from Lineage
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"   # weekly, Monday 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-lineage-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    uses: BlissRoms/upstream-sync/.github/workflows/sync.yml@main
+    with:
+      upstream_repo: LineageOS/android_packages_apps_Aperture
+      upstream_branch: lineage-24.0
+      target_branch: xylobium
+    secrets: inherit
